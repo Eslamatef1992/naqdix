@@ -21,7 +21,7 @@ const waLink = (num, text) => `https://wa.me/${num}${text ? `?text=${encodeURICo
 export function Header() {
   const { t, lang, setLang } = useLang();
   const [open, setOpen] = useState(false);
-  const links = [['/#solutions', t.nav.modules], ['/features', t.nav.features], ['/android', t.nav.android], ['/#pricing', t.nav.pricing], ['/#faq', t.nav.faq]];
+  const links = [['/#solutions', t.nav.modules], ['/features', t.nav.features], ['/add-ons', t.nav.addons], ['/android', t.nav.android], ['/#pricing', t.nav.pricing], ['/#faq', t.nav.faq]];
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-line">
       <div className="wrap h-[68px] flex items-center gap-6">
@@ -61,6 +61,7 @@ export function Footer() {
           <ul className="grid gap-2 text-ink-2">
             <li><a href="/#solutions" className="hover:text-ink">{t.nav.modules}</a></li>
             <li><Link to="/features" className="hover:text-ink">{t.nav.features}</Link></li>
+            <li><Link to="/add-ons" className="hover:text-ink">{t.nav.addons}</Link></li>
             <li><Link to="/android" className="hover:text-ink">{t.nav.android}</Link></li>
             <li><a href="/#pricing" className="hover:text-ink">{t.nav.pricing}</a></li>
             <li><a href="/#faq" className="hover:text-ink">{t.nav.faq}</a></li>

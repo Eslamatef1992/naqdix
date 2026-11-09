@@ -1,6 +1,6 @@
 // Website text, English and Arabic. Prices and plan features come from the admin panel.
 const en = {
-  nav: { modules: 'Solutions', features: 'Features', android: 'Android POS', pricing: 'Pricing', faq: 'FAQ', demo: 'Request a demo', other: 'العربية' },
+  nav: { modules: 'Solutions', features: 'Features', addons: 'Add-ons', android: 'Android POS', pricing: 'Pricing', faq: 'FAQ', demo: 'Request a demo', other: 'العربية' },
   hero: {
     title: 'The point of sale that keeps up with your store',
     body: 'Naqdi X runs your counter, stock, customers and reports in one place. Built for shops, supermarkets and chains in Kuwait and the Gulf, in Arabic and English.',
@@ -26,8 +26,8 @@ const en = {
   features: {
     title: 'See Naqdi X at work',
     lead: 'Real screens from a store running Naqdi X every day: selling, cash, expenses and reports, in Arabic and English.',
-    modulesTitle: 'Everything included',
-    modulesLead: 'Every Naqdi X store gets the full set of modules, in Arabic and English.',
+    modulesTitle: 'Core modules',
+    modulesLead: 'What every Naqdi X store runs on, in Arabic and English.', addonsLink: 'See the add-ons',
     modules: [
       ['chart', 'Dashboard', "Today's and this month's revenue, low stock and best sellers."],
       ['cart', 'New sale', 'Scan IMEI or barcode and take split payments: cash, KNET, WAMD or credit.'],
@@ -35,16 +35,6 @@ const en = {
       ['tag', 'Accessories', 'Chargers, cases and other items sold by barcode and quantity.'],
       ['settings', 'Services', 'Repairs and services billed on the same receipt.'],
       ['box', 'Inventory', 'Stock levels, low-stock alerts and stock counts.'],
-      ['card', 'Credit customers', 'Sell on credit, track balances and record repayments.'],
-      ['wallet', 'Custody', 'Cash float with deposits, payouts and a running balance.'],
-      ['receipt', 'Expenses', 'Salaries, rent and bills by type, taken off monthly profit.'],
-      ['register', 'Sales', 'Every invoice, searchable, with reprint and email.'],
-      ['inbox', 'Purchases', 'Purchase orders that add stock and update costs.'],
-      ['truck', 'Suppliers', 'Supplier details, purchase history and what you owe.'],
-      ['heart', 'Customers', 'Customer records with purchase history.'],
-      ['undo', 'Returns', 'Refunds and exchanges that put items back into stock.'],
-      ['chart', 'Reports', 'Sales, profit, stock and expense reports by day, month or year.'],
-      ['users', 'Users', 'Staff accounts with roles and permissions.'],
     ],
     cta: 'Ready to try it in your store?', ctaBtn: 'Request a demo', ctaPlans: 'See plans',
     shots: [
@@ -59,6 +49,23 @@ const en = {
       { img: 'login', title: 'Secure staff sign-in', body: 'Each staff member signs in with their own account and role, and can switch between Arabic and English.',
         points: ['Roles and permissions', 'Arabic and English interface'] },
     ],
+  },
+  addons: {
+    title: 'Add-ons for every part of your store',
+    lead: 'Go beyond the till. Add credit sales, cash custody, purchasing, returns, reports and staff accounts as your store grows.',
+    items: [
+      ['card', 'Credit customers', 'Sell on credit, track balances and record repayments.'],
+      ['wallet', 'Custody', 'Cash float with deposits, payouts and a running balance.'],
+      ['receipt', 'Expenses', 'Salaries, rent and bills by type, taken off monthly profit.'],
+      ['register', 'Sales', 'Every invoice, searchable, with reprint and email.'],
+      ['inbox', 'Purchases', 'Purchase orders that add stock and update costs.'],
+      ['truck', 'Suppliers', 'Supplier details, purchase history and what you owe.'],
+      ['heart', 'Customers', 'Customer records with purchase history.'],
+      ['undo', 'Returns', 'Refunds and exchanges that put items back into stock.'],
+      ['chart', 'Reports', 'Sales, profit, stock and expense reports by day, month or year.'],
+      ['users', 'Users', 'Staff accounts with roles and permissions.'],
+    ],
+    cta: 'Want an add-on for your store?', ctaBtn: 'Talk to us',
   },
   android: {
     title: 'POS Application for Android',
@@ -121,7 +128,7 @@ const en = {
 };
 
 const ar = {
-  nav: { modules: 'الحلول', features: 'المزايا', android: 'تطبيق أندرويد', pricing: 'الأسعار', faq: 'الأسئلة', demo: 'اطلب عرضاً تجريبياً', other: 'English' },
+  nav: { modules: 'الحلول', features: 'المزايا', addons: 'الإضافات', android: 'تطبيق أندرويد', pricing: 'الأسعار', faq: 'الأسئلة', demo: 'اطلب عرضاً تجريبياً', other: 'English' },
   hero: {
     title: 'نقطة بيع تواكب متجرك',
     body: 'نقدي إكس يدير الكاشير والمخزون والعملاء والتقارير في مكان واحد. مصمم للمحلات والسوبرماركت والسلاسل في الكويت والخليج، بالعربية والإنجليزية.',
@@ -147,8 +154,8 @@ const ar = {
   features: {
     title: 'شاهد نقدي X أثناء العمل',
     lead: 'شاشات حقيقية من متجر يعمل على نقدي X يومياً: البيع والعهدة والمصروفات والتقارير، بالعربية والإنجليزية.',
-    modulesTitle: 'كل شيء مشمول',
-    modulesLead: 'كل متجر على نقدي إكس يحصل على جميع الوحدات، بالعربية والإنجليزية.',
+    modulesTitle: 'الوحدات الأساسية',
+    modulesLead: 'ما يعمل عليه كل متجر في نقدي إكس، بالعربية والإنجليزية.', addonsLink: 'شاهد الإضافات',
     modules: [
       ['chart', 'الرئيسية', 'إيرادات اليوم والشهر، والمخزون المنخفض، والأكثر مبيعاً.'],
       ['cart', 'بيع جديد', 'امسح IMEI أو الباركود واقبل الدفع المقسّم: نقدي، كي نت، ومض أو آجل.'],
@@ -156,16 +163,6 @@ const ar = {
       ['tag', 'الإكسسوارات', 'الشواحن والأغطية وغيرها بالباركود والكمية.'],
       ['settings', 'الخدمات', 'الصيانة والخدمات على نفس الفاتورة.'],
       ['box', 'المخزون', 'مستويات المخزون وتنبيهات النقص والجرد.'],
-      ['card', 'عملاء الآجل', 'البيع بالآجل ومتابعة الأرصدة وتسجيل السداد.'],
-      ['wallet', 'العهدة', 'عهدة نقدية بالإيداع والصرف والرصيد الجاري.'],
-      ['receipt', 'المصروفات', 'الرواتب والإيجار والفواتير حسب النوع، تُخصم من الربح الشهري.'],
-      ['register', 'المبيعات', 'كل الفواتير مع البحث وإعادة الطباعة والإرسال بالبريد.'],
-      ['inbox', 'المشتريات', 'أوامر شراء تضيف المخزون وتحدّث التكلفة.'],
-      ['truck', 'الموردين', 'بيانات الموردين وسجل المشتريات والمستحقات.'],
-      ['heart', 'العملاء', 'سجلات العملاء مع تاريخ مشترياتهم.'],
-      ['undo', 'المرتجعات', 'الاسترداد والاستبدال مع إعادة الأصناف للمخزون.'],
-      ['chart', 'التقارير', 'تقارير المبيعات والأرباح والمخزون والمصروفات يومياً أو شهرياً أو سنوياً.'],
-      ['users', 'المستخدمين', 'حسابات الموظفين بالأدوار والصلاحيات.'],
     ],
     cta: 'جاهز لتجربته في متجرك؟', ctaBtn: 'اطلب عرضاً تجريبياً', ctaPlans: 'شاهد الباقات',
     shots: [
@@ -180,6 +177,23 @@ const ar = {
       { img: 'login', title: 'دخول آمن للموظفين', body: 'لكل موظف حسابه وصلاحياته، مع التبديل بين العربية والإنجليزية.',
         points: ['أدوار وصلاحيات', 'واجهة عربية وإنجليزية'] },
     ],
+  },
+  addons: {
+    title: 'إضافات لكل جزء من متجرك',
+    lead: 'تجاوز نقطة البيع. أضف البيع بالآجل والعهدة والمشتريات والمرتجعات والتقارير وحسابات الموظفين مع نمو متجرك.',
+    items: [
+      ['card', 'عملاء الآجل', 'البيع بالآجل ومتابعة الأرصدة وتسجيل السداد.'],
+      ['wallet', 'العهدة', 'عهدة نقدية بالإيداع والصرف والرصيد الجاري.'],
+      ['receipt', 'المصروفات', 'الرواتب والإيجار والفواتير حسب النوع، تُخصم من الربح الشهري.'],
+      ['register', 'المبيعات', 'كل الفواتير مع البحث وإعادة الطباعة والإرسال بالبريد.'],
+      ['inbox', 'المشتريات', 'أوامر شراء تضيف المخزون وتحدّث التكلفة.'],
+      ['truck', 'الموردين', 'بيانات الموردين وسجل المشتريات والمستحقات.'],
+      ['heart', 'العملاء', 'سجلات العملاء مع تاريخ مشترياتهم.'],
+      ['undo', 'المرتجعات', 'الاسترداد والاستبدال مع إعادة الأصناف للمخزون.'],
+      ['chart', 'التقارير', 'تقارير المبيعات والأرباح والمخزون والمصروفات يومياً أو شهرياً أو سنوياً.'],
+      ['users', 'المستخدمين', 'حسابات الموظفين بالأدوار والصلاحيات.'],
+    ],
+    cta: 'تريد إضافة لمتجرك؟', ctaBtn: 'تواصل معنا',
   },
   android: {
     title: 'تطبيق نقاط البيع على أندرويد',

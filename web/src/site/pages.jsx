@@ -397,7 +397,7 @@ export function FeaturesPage() {
         <div className="wrap">
           <h2 className="h2">{f.modulesTitle}</h2>
           <p className="mt-3 text-[17px] text-ink-2 max-w-[52ch]">{f.modulesLead}</p>
-          <ul className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-8">
+          <ul className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8">
             {f.modules.map(([icon, name, desc]) => (
               <li key={name} className="flex gap-3.5">
                 <span className="shrink-0 size-10 rounded-xl bg-sky grid place-items-center text-signal"><Icon name={icon} size={20} /></span>
@@ -408,6 +408,7 @@ export function FeaturesPage() {
               </li>
             ))}
           </ul>
+          <Link to="/add-ons" className="btn btn-line mt-10">{f.addonsLink}</Link>
         </div>
       </section>
 
@@ -434,6 +435,44 @@ export function FeaturesPage() {
           <div className="flex flex-wrap gap-3">
             <a href="/#demo" className="btn btn-primary">{f.ctaBtn}</a>
             <a href="/#pricing" className="btn bg-white/10 text-white hover:bg-white/20">{f.ctaPlans}</a>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+export function AddonsPage() {
+  const { t } = useLang();
+  const a = t.addons;
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+  return (
+    <>
+      <section className="bg-ink text-white">
+        <div className="wrap py-16 lg:py-20">
+          <h1 className="display text-[40px] sm:text-[56px] max-w-[18ch]">{a.title}</h1>
+          <p className="mt-5 text-[18px] text-white/75 max-w-[54ch] leading-relaxed">{a.lead}</p>
+        </div>
+      </section>
+      <section className="py-16 lg:py-20">
+        <div className="wrap">
+          <ul className="grid sm:grid-cols-2 gap-4">
+            {a.items.map(([icon, name, desc]) => (
+              <li key={name} className="rounded-2xl bg-white border border-line p-6 flex gap-5">
+                <span className="shrink-0 size-11 rounded-xl bg-sky grid place-items-center text-signal"><Icon name={icon} size={22} /></span>
+                <div><h2 className="text-[19px] font-bold">{name}</h2>
+                <p className="mt-1.5 text-[15px] text-ink-2 leading-relaxed">{desc}</p></div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+      <section className="bg-white border-t border-line">
+        <div className="wrap py-14 flex flex-col sm:flex-row gap-6 sm:items-center justify-between">
+          <h2 className="h2 max-w-[20ch]">{a.cta}</h2>
+          <div className="flex flex-wrap gap-3">
+            <a href="/#demo" className="btn btn-primary">{a.ctaBtn}</a>
+            <Link to="/features" className="btn btn-line">{t.nav.features}</Link>
           </div>
         </div>
       </section>
