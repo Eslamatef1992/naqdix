@@ -210,12 +210,14 @@ export function Checkout() {
   const [q] = useSearchParams();
   const cat = useCatalog();
   const product = cat?.products?.find((p) => p.slug === slug);
-  const [interval, setInterval] = useState(q.get('interval') === 'yearly' ? 'yearly' : 'monthly');
+  const [chosen, setInterval] = useState(q.get('interval') === 'monthly' ? 'monthly' : 'yearly');
   const [f, setF] = useState({ name: '', company: '', email: '', phone: '' });
   const [state, setState] = useState({ busy: '', error: '' });
   if (!cat) return <div className="min-h-[60vh]" />;
   if (!product) return <div className="wrap py-24 text-center"><p className="text-[18px]">404</p><Link to="/" className="btn btn-line mt-6">{t.order.back}</Link></div>;
   const isApp = product.kind === 'app';
+  const periods = isApp ? [] : ['monthly', 'yearly'].filter((k) => product[`price_${k}`] != null);
+  const interval = periods.includes(chosen) ? chosen : periods[0] || 'yearly';
   const effInterval = isApp ? 'once' : interval;
   const amount = isApp ? product.price_once : interval === 'yearly' ? product.price_yearly : product.price_monthly;
   const methods = cat.paymentMethods || [];
@@ -262,9 +264,9 @@ export function Checkout() {
               </div>
               {isApp ? <Icon name="phone" size={28} className="text-signal" /> : <Icon name="register" size={28} className="text-signal" />}
             </div>
-            {!isApp && (
+            {periods.length > 1 && (
               <div className="mt-5 grid grid-cols-2 gap-2" role="radiogroup">
-                {['monthly', 'yearly'].map((k) => (
+                {periods.map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={interval === k} onClick={() => setInterval(k)}
                     className={cx('rounded-xl border px-3 py-3 text-start', interval === k ? 'border-signal ring-1 ring-signal bg-sky/50' : 'border-line')}>
                     <span className="block text-[14px] font-semibold">{t.pricing[k]}</span>

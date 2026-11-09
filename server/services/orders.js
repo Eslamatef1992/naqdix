@@ -19,6 +19,9 @@ export function productOut(p) {
 export function priceFor(product, interval) {
   if (product.kind === 'app') return product.price_once != null ? { interval: 'once', amount: +product.price_once } : null;
   if (interval === 'yearly' && product.price_yearly != null) return { interval: 'yearly', amount: +product.price_yearly };
+  if (interval === 'monthly' && product.price_monthly != null) return { interval: 'monthly', amount: +product.price_monthly };
+  // whichever billing period the plan offers (plans are yearly only by default)
+  if (product.price_yearly != null) return { interval: 'yearly', amount: +product.price_yearly };
   if (product.price_monthly != null) return { interval: 'monthly', amount: +product.price_monthly };
   return null;
 }

@@ -40,8 +40,8 @@ const en = {
     items: ['KNET terminals', 'Visa / Mastercard', 'Shopify', 'WooCommerce', 'WhatsApp receipts', 'Accounting and ERP', 'Barcode scanners', 'Receipt printers'],
   },
   pricing: {
-    title: 'Simple plans, priced in Kuwaiti dinars',
-    body: 'Pay monthly or save with a yearly plan. Upgrade any time.',
+    title: 'Two plans, one yearly price',
+    body: 'One yearly subscription per store, with updates and support included. Move up to Multi Branch any time.',
     monthly: 'Monthly', yearly: 'Yearly', save: '2 months free',
     perMonth: '/ month', perYear: '/ year', choose: 'Choose', popular: 'Most popular',
     note: 'Prices in KWD. Card and PayPal payments are charged in USD at the current rate.',
@@ -124,8 +124,8 @@ const ar = {
     items: ['أجهزة كي نت', 'Visa / Mastercard', 'Shopify', 'WooCommerce', 'إيصالات واتساب', 'المحاسبة وERP', 'قارئات الباركود', 'طابعات الإيصالات'],
   },
   pricing: {
-    title: 'باقات بسيطة بالدينار الكويتي',
-    body: 'ادفع شهرياً أو وفّر مع الاشتراك السنوي. رقِّ باقتك في أي وقت.',
+    title: 'باقتان بسعر سنوي واحد',
+    body: 'اشتراك سنوي واحد لكل متجر، يشمل التحديثات والدعم. انتقل إلى باقة الفروع المتعددة في أي وقت.',
     monthly: 'شهري', yearly: 'سنوي', save: 'شهران مجاناً',
     perMonth: '/ شهرياً', perYear: '/ سنوياً', choose: 'اختر', popular: 'الأكثر طلباً',
     note: 'الأسعار بالدينار الكويتي. الدفع بالبطاقة أو PayPal يُحتسب بالدولار حسب السعر الحالي.',

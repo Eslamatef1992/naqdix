@@ -291,14 +291,14 @@ function Products() {
         <Table rows={data.data} onRow={open} cols={[
           ['Product', (p) => <div><p className="font-semibold">{p.name}</p><p className="text-ink-3 text-[12px]" dir="rtl">{p.name_ar}</p></div>],
           ['Type', (p) => (p.kind === 'app' ? 'Android app (one payment)' : 'Plan')],
-          ['Price', (p) => (p.kind === 'app' ? money(p.price_once, p.currency) : `${money(p.price_monthly, p.currency)} / month · ${money(p.price_yearly, p.currency)} / year`)],
+          ['Price', (p) => (p.kind === 'app' ? `${money(p.price_once, p.currency)} one payment` : [p.price_yearly != null && `${money(p.price_yearly, p.currency)} / year`, p.price_monthly != null && `${money(p.price_monthly, p.currency)} / month`].filter(Boolean).join(' · ') || '—')],
           ['On website', (p) => (p.is_active ? <Badge s="activated" /> : <span className="text-ink-3 text-[13px]">Hidden</span>)],
         ]} />
       </Panel>
       {f && (
         <Modal title={f.id ? `Edit ${f.name}` : 'New plan'} onClose={() => setF(null)}>
           <div className="grid grid-cols-2 gap-3">{txt('name', 'Name (English)')}{txt('name_ar', 'Name (Arabic)', 'rtl')}{txt('tagline', 'Short line (English)')}{txt('tagline_ar', 'Short line (Arabic)', 'rtl')}</div>
-          {f.kind === 'app' ? num('price_once', `Price, one payment (${f.currency})`) : <div className="grid grid-cols-2 gap-3">{num('price_monthly', `Monthly (${f.currency})`)}{num('price_yearly', `Yearly (${f.currency})`)}</div>}
+          {f.kind === 'app' ? num('price_once', `Price, one payment (${f.currency})`) : <div className="grid grid-cols-2 gap-3">{num('price_yearly', `Yearly (${f.currency})`)}{num('price_monthly', `Monthly (${f.currency}), leave empty for yearly only`)}</div>}
           <label className="grid gap-1.5 text-[14px] font-medium">Features (English, one per line)<textarea className="field" rows={5} value={f.featuresEn} onChange={(e) => setF({ ...f, featuresEn: e.target.value })} /></label>
           <label className="grid gap-1.5 text-[14px] font-medium">Features (Arabic, one per line)<textarea className="field" rows={5} dir="rtl" value={f.featuresAr} onChange={(e) => setF({ ...f, featuresAr: e.target.value })} /></label>
           <div className="flex flex-wrap gap-5 text-[14px]">

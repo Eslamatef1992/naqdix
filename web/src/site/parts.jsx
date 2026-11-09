@@ -135,11 +135,14 @@ export function PricingCards({ compact = false }) {
   const { t, lang } = useLang();
   const cat = useCatalog();
   const nav = useNavigate();
-  const [interval, setInterval] = useState('monthly');
   const plans = (cat?.products || []).filter((p) => p.kind === 'plan');
+  const hasMonthly = plans.some((p) => p.price_monthly != null);
+  const hasYearly = plans.some((p) => p.price_yearly != null);
+  const [chosen, setInterval] = useState('yearly');
+  const interval = !hasMonthly ? 'yearly' : !hasYearly ? 'monthly' : chosen;
   return (
     <div>
-      <div className="flex justify-center mb-8">
+      {hasMonthly && hasYearly && <div className="flex justify-center mb-8">
         <div className="inline-flex p-1 rounded-xl bg-white border border-line" role="radiogroup" aria-label={t.pricing.title}>
           {['monthly', 'yearly'].map((k) => (
             <button key={k} type="button" role="radio" aria-checked={interval === k} onClick={() => setInterval(k)}
@@ -148,11 +151,12 @@ export function PricingCards({ compact = false }) {
             </button>
           ))}
         </div>
-      </div>
+      </div>}
       {!cat ? <div className="h-80" /> : (
-        <div className={cx('grid gap-5', plans.length >= 3 ? 'lg:grid-cols-3' : 'md:grid-cols-2', 'max-w-[1100px] mx-auto')}>
+        <div className={cx('grid gap-5 mx-auto', plans.length >= 3 ? 'lg:grid-cols-3 max-w-[1100px]' : 'md:grid-cols-2 max-w-[860px]')}>
           {plans.map((p) => {
-            const price = interval === 'yearly' ? p.price_yearly ?? p.price_monthly * 12 : p.price_monthly;
+            const per = interval === 'yearly' && p.price_yearly != null ? 'yearly' : p.price_monthly != null ? 'monthly' : 'yearly';
+            const price = per === 'yearly' ? p.price_yearly : p.price_monthly;
             const feats = (lang === 'ar' && p.features.ar?.length ? p.features.ar : p.features.en) || [];
             return (
               <div key={p.id} className={cx('relative rounded-2xl p-7 flex flex-col', p.highlighted ? 'bg-ink text-white ring-1 ring-ink' : 'bg-white border border-line')}>
@@ -161,14 +165,14 @@ export function PricingCards({ compact = false }) {
                 <p className={cx('text-[14px] mt-1', p.highlighted ? 'text-white/70' : 'text-ink-3')}>{pick(p, 'tagline', lang)}</p>
                 <p className="mt-6 flex items-baseline gap-2">
                   <span className="text-[40px] font-extrabold tnum leading-none" dir="ltr">{(+price).toFixed(3).replace(/\.000$/, '')}</span>
-                  <span className={cx('text-[15px]', p.highlighted ? 'text-white/70' : 'text-ink-3')}>KWD {interval === 'yearly' ? t.pricing.perYear : t.pricing.perMonth}</span>
+                  <span className={cx('text-[15px]', p.highlighted ? 'text-white/70' : 'text-ink-3')}>KWD {per === 'yearly' ? t.pricing.perYear : t.pricing.perMonth}</span>
                 </p>
                 {!compact && (
                   <ul className="mt-6 grid gap-3 text-[15px] flex-1">
                     {feats.map((f) => <li key={f} className="flex gap-2.5"><Icon name="check" size={18} className={cx('shrink-0 mt-0.5', p.highlighted ? 'text-[#7fb0ff]' : 'text-signal')} />{f}</li>)}
                   </ul>
                 )}
-                <button type="button" onClick={() => nav(`/checkout/${p.slug}?interval=${interval}`)}
+                <button type="button" onClick={() => nav(`/checkout/${p.slug}?interval=${per}`)}
                   className={cx('btn mt-7 w-full', p.highlighted ? 'btn-primary' : 'btn-ink')}>{t.pricing.choose} {pick(p, 'name', lang)}</button>
               </div>
             );
@@ -186,7 +190,7 @@ export function Handheld() {
   return (
     <div className="relative mx-auto w-[230px]" role="img" aria-label="Android handheld POS">
       <div className="h-10 mx-10 rounded-t-xl bg-[#e9edf5] border border-b-0 border-line flex items-end justify-center pb-1"><div className="h-1 w-24 rounded bg-ink-3/40" /></div>
-      <div className="rounded-[28px] bg-ink p-3 shadow-[0_30px_50px_-25px_rgba(11,31,75,.6)]">
+      <div className="rounded-[28px] bg-[#1b3474] ring-1 ring-white/15 p-3 shadow-[0_30px_50px_-25px_rgba(0,0,0,.6)]">
         <div className="rounded-[18px] bg-white text-ink overflow-hidden">
           <div className="bg-signal text-white px-4 py-3 flex justify-between items-center text-[13px]"><span className="font-semibold">Naqdi X</span><span dir="ltr" className="tnum">09:41</span></div>
           <div className="p-4 grid gap-2 text-[13px]">

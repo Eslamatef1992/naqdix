@@ -60,11 +60,13 @@ let appOrder;
 test('catalogue lists the plans and the Android app', async () => {
   const r = await call('GET', '/api/catalog');
   assert.equal(r.status, 200);
-  assert.deepEqual(r.data.products.map((p) => p.slug), ['starter', 'business', 'enterprise', 'android-pos']);
+  assert.deepEqual(r.data.products.map((p) => p.slug), ['single-branch', 'multi-branch', 'android-pos']);
   assert.deepEqual(r.data.paymentMethods, ['card', 'paypal']);
-  assert.equal(r.data.products[3].price_once, 120);
+  assert.equal(r.data.products[2].price_once, 145);
+  assert.deepEqual([r.data.products[0].price_yearly, r.data.products[0].price_monthly], [65, null]);
+  assert.deepEqual([r.data.products[1].price_yearly, r.data.products[1].price_monthly], [109, null]);
   assert.equal(r.data.products[1].highlighted, true);
-  assert.equal(r.data.products[0].features.ar.length, 6);
+  assert.equal(r.data.products[0].features.ar.length, 9);
   assert.deepEqual(r.data.charge, { currency: 'USD', converted: true, rate: 3.26 });
 });
 
@@ -77,7 +79,7 @@ test('buying the Android app by card opens PayPal as "Naqdi X" with the converte
   assert.equal(pp.ctx.landing_page, 'GUEST_CHECKOUT');
   assert.equal(pp.ctx.locale, 'ar-KW');
   assert.equal(pp.ctx.return_url, 'https://naqdix.com/api/paypal/return');
-  assert.equal(pp.purchase_units[0].amount.value, '391.20'); // 120 KWD × 3.26
+  assert.equal(pp.purchase_units[0].amount.value, '472.70'); // 145 KWD × 3.26
   appOrder = r.data;
   appOrder.url = r.data.url;
 });
@@ -115,10 +117,11 @@ test('fake or underpaid payments are rejected', async () => {
   assert.equal((await call('GET', '/api/paypal/return?token=NOPE')).location, 'https://naqdix.com/?payment=unknown');
 });
 
-test('a yearly plan runs for a year; renewing continues from the end date', async () => {
-  const r = await call('POST', '/api/checkout', { product: 'business', interval: 'yearly', ...customer });
+test('plans are yearly (even if monthly is asked for); renewing continues from the end date', async () => {
+  const r = await call('POST', '/api/checkout', { product: 'multi-branch', interval: 'monthly', ...customer });
   assert.equal(r.status, 201);
-  assert.equal(orders.get(new URL(r.data.url).searchParams.get('token')).purchase_units[0].amount.value, '619.40'); // 190 × 3.26
+  assert.equal(orders.get(new URL(r.data.url).searchParams.get('token')).purchase_units[0].amount.value, '355.34'); // 109 × 3.26
+  assert.equal((await db('orders').where({ token: r.data.token }).first()).interval, 'yearly');
   await call('GET', `/api/paypal/return?token=${approve(r.data.url)}`);
   const o = (await call('GET', `/api/orders/${r.data.token}`)).data;
   assert.equal(o.status, 'paid');
@@ -139,9 +142,9 @@ test('a yearly plan runs for a year; renewing continues from the end date', asyn
 
 test('checkout validation', async () => {
   assert.equal((await call('POST', '/api/checkout', { product: 'nope', ...customer })).status, 400);
-  assert.equal((await call('POST', '/api/checkout', { product: 'starter', ...customer, email: 'x' })).status, 400);
-  assert.equal((await call('POST', '/api/checkout', { product: 'starter', ...customer, phone: '12' })).status, 400);
-  assert.equal((await call('POST', '/api/checkout', { product: 'starter', ...customer, name: '' })).status, 400);
+  assert.equal((await call('POST', '/api/checkout', { product: 'single-branch', ...customer, email: 'x' })).status, 400);
+  assert.equal((await call('POST', '/api/checkout', { product: 'single-branch', ...customer, phone: '12' })).status, 400);
+  assert.equal((await call('POST', '/api/checkout', { product: 'single-branch', ...customer, name: '' })).status, 400);
   assert.equal((await call('GET', '/api/orders/not-a-token')).status, 404);
 });
 
@@ -207,9 +210,9 @@ test('admin: prices and contact details show on the website', async () => {
   assert.equal(cat.contact.whatsapp, '96555550000');
   assert.equal(cat.contact.email, 'sales@naqdix.com');
   // hiding a plan removes it from the website
-  const starter = products.find((p) => p.slug === 'starter');
+  const starter = products.find((p) => p.slug === 'single-branch');
   await admin('PATCH', `/api/admin/products/${starter.id}`, { is_active: false });
-  assert.ok(!(await call('GET', '/api/catalog')).data.products.some((p) => p.slug === 'starter'));
+  assert.ok(!(await call('GET', '/api/catalog')).data.products.some((p) => p.slug === 'single-branch'));
   const created = await admin('POST', '/api/admin/products', { kind: 'plan', name: 'Kiosk', price_monthly: 5, features: { en: ['1 kiosk'], ar: ['كشك واحد'] } });
   assert.equal(created.status, 201);
   assert.equal(created.data.slug, 'kiosk');
