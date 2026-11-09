@@ -1,6 +1,6 @@
 // Website text, English and Arabic. Prices and plan features come from the admin panel.
 const en = {
-  nav: { modules: 'Solutions', android: 'Android POS', pricing: 'Pricing', faq: 'FAQ', demo: 'Request a demo', other: 'العربية' },
+  nav: { modules: 'Solutions', features: 'Features', android: 'Android POS', pricing: 'Pricing', faq: 'FAQ', demo: 'Request a demo', other: 'العربية' },
   hero: {
     title: 'The point of sale that keeps up with your store',
     body: 'Naqdi X runs your counter, stock, customers and reports in one place. Built for shops, supermarkets and chains in Kuwait and the Gulf, in Arabic and English.',
@@ -21,6 +21,25 @@ const en = {
       { icon: 'tag', title: 'Promotions', body: 'Discounts, bundles and happy-hour prices that start and stop on their own.' },
       { icon: 'chart', title: 'Reports', body: 'Sales by hour, item, cashier and branch. Daily Z-report and profit per product.' },
       { icon: 'branches', title: 'Multi-branch', body: 'Prices, products and stock transfers controlled from one dashboard.' },
+    ],
+  },
+  features: {
+    title: 'See Naqdi X at work',
+    lead: 'Real screens from a store running Naqdi X every day: selling, cash, expenses and reports, in Arabic and English.',
+    modulesTitle: 'Everything in one menu',
+    modules: ['Dashboard', 'New sale', 'Devices', 'Accessories', 'Services', 'Inventory', 'Credit customers', 'Cash custody', 'Expenses', 'Sales', 'Purchases', 'Suppliers', 'Customers'],
+    cta: 'Ready to try it in your store?', ctaBtn: 'Request a demo', ctaPlans: 'See plans',
+    shots: [
+      { img: 'sale', title: 'Sell in seconds', body: 'Scan an IMEI or barcode, or type a product name. Split one bill across cash, KNET, WAMD and credit, add a discount, and attach the customer for an emailed invoice.',
+        points: ['IMEI and barcode scanning', 'Split payment: cash, KNET, WAMD, credit', 'Devices, accessories and services in one cart'] },
+      { img: 'dashboard', title: 'Your store at a glance', body: "Today's revenue, this month's revenue, sales count, available devices and low-stock items, with the last 7 days and your best sellers.",
+        points: ['Daily and monthly revenue', 'Low-stock alerts', 'Best sellers and 7-day trend'] },
+      { img: 'custody', title: 'Cash custody you can trust', body: 'Every deposit, payout, refund and adjustment is logged with the running balance after it, and linked to its purchase invoice.',
+        points: ['Running balance after every entry', 'Linked to purchase orders', 'Print or export to Excel'] },
+      { img: 'expenses', title: 'Expenses that come off profit', body: 'Record salaries, rent, shipping and bills by type. Monthly and yearly totals are deducted from your monthly profit automatically.',
+        points: ['Breakdown by expense type', 'Filter by month and year', 'Paid from custody or cash'] },
+      { img: 'login', title: 'Secure staff sign-in', body: 'Each staff member signs in with their own account and role, and can switch between Arabic and English.',
+        points: ['Roles and permissions', 'Arabic and English interface'] },
     ],
   },
   android: {
@@ -84,7 +103,7 @@ const en = {
 };
 
 const ar = {
-  nav: { modules: 'الحلول', android: 'تطبيق أندرويد', pricing: 'الأسعار', faq: 'الأسئلة', demo: 'اطلب عرضاً تجريبياً', other: 'English' },
+  nav: { modules: 'الحلول', features: 'المزايا', android: 'تطبيق أندرويد', pricing: 'الأسعار', faq: 'الأسئلة', demo: 'اطلب عرضاً تجريبياً', other: 'English' },
   hero: {
     title: 'نقطة بيع تواكب متجرك',
     body: 'نقدي إكس يدير الكاشير والمخزون والعملاء والتقارير في مكان واحد. مصمم للمحلات والسوبرماركت والسلاسل في الكويت والخليج، بالعربية والإنجليزية.',
@@ -105,6 +124,25 @@ const ar = {
       { icon: 'tag', title: 'العروض', body: 'خصومات وباقات وأسعار مؤقتة تبدأ وتنتهي تلقائياً.' },
       { icon: 'chart', title: 'التقارير', body: 'المبيعات حسب الساعة والصنف والكاشير والفرع، وتقرير الإغلاق اليومي، والربح لكل منتج.' },
       { icon: 'branches', title: 'تعدد الفروع', body: 'الأسعار والمنتجات وتحويل المخزون من لوحة تحكم واحدة.' },
+    ],
+  },
+  features: {
+    title: 'شاهد نقدي X أثناء العمل',
+    lead: 'شاشات حقيقية من متجر يعمل على نقدي X يومياً: البيع والعهدة والمصروفات والتقارير، بالعربية والإنجليزية.',
+    modulesTitle: 'كل شيء في قائمة واحدة',
+    modules: ['الرئيسية', 'بيع جديد', 'الأجهزة', 'الإكسسوارات', 'الخدمات', 'المخزون', 'عملاء الآجل', 'العهدة', 'المصروفات', 'المبيعات', 'المشتريات', 'الموردين', 'العملاء'],
+    cta: 'جاهز لتجربته في متجرك؟', ctaBtn: 'اطلب عرضاً تجريبياً', ctaPlans: 'شاهد الباقات',
+    shots: [
+      { img: 'sale', title: 'بيع خلال ثوانٍ', body: 'امسح IMEI أو الباركود أو اكتب اسم المنتج. قسّم الفاتورة بين النقدي وكي نت وومض والآجل، وأضف خصماً، وسجّل العميل لإرسال الفاتورة بالبريد.',
+        points: ['مسح IMEI والباركود', 'دفع مقسّم: نقدي، كي نت، ومض، آجل', 'أجهزة وإكسسوارات وخدمات في سلة واحدة'] },
+      { img: 'dashboard', title: 'متجرك في نظرة واحدة', body: 'إيرادات اليوم والشهر، وعدد المبيعات، والأجهزة المتوفرة، والمخزون المنخفض، مع آخر 7 أيام والأكثر مبيعاً.',
+        points: ['إيرادات يومية وشهرية', 'تنبيهات المخزون المنخفض', 'الأكثر مبيعاً واتجاه 7 أيام'] },
+      { img: 'custody', title: 'عهدة نقدية موثوقة', body: 'كل إيداع وصرف واسترداد وتعديل يُسجَّل مع الرصيد بعده، ويرتبط بفاتورة الشراء.',
+        points: ['الرصيد بعد كل عملية', 'مرتبطة بأوامر الشراء', 'طباعة أو تصدير Excel'] },
+      { img: 'expenses', title: 'مصروفات تُخصم من الربح', body: 'سجّل الرواتب والإيجار والشحن والفواتير حسب النوع. تُخصم إجماليات الشهر والسنة من الربح الشهري تلقائياً.',
+        points: ['توزيع حسب نوع المصروف', 'فلترة بالشهر والسنة', 'الدفع من العهدة أو نقداً'] },
+      { img: 'login', title: 'دخول آمن للموظفين', body: 'لكل موظف حسابه وصلاحياته، مع التبديل بين العربية والإنجليزية.',
+        points: ['أدوار وصلاحيات', 'واجهة عربية وإنجليزية'] },
     ],
   },
   android: {

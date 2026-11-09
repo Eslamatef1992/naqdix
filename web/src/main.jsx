@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import './styles.css';
 import { LangProvider } from './lib/i18n.jsx';
 import { CatalogProvider, Header, Footer, WhatsAppButton } from './site/parts.jsx';
-import { Home, AndroidPage, Checkout, OrderPage } from './site/pages.jsx';
+import { Home, AndroidPage, Checkout, OrderPage, FeaturesPage } from './site/pages.jsx';
 
 const Admin = lazy(() => import('./admin/Admin.jsx'));
 
@@ -24,6 +24,7 @@ function Site() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/android" element={<AndroidPage />} />
+            <Route path="/features" element={<FeaturesPage />} />
             <Route path="/checkout/:slug" element={<Checkout />} />
             <Route path="/order/:token" element={<OrderPage />} />
             <Route path="*" element={<Home />} />

@@ -361,3 +361,73 @@ export function OrderPage() {
     </section>
   );
 }
+
+// ---------- features: real product screens ----------
+function Screen({ src, alt, narrow }) {
+  return (
+    <figure className={cx('rounded-2xl bg-ink p-2 sm:p-3 shadow-[0_24px_60px_-28px_rgba(15,27,61,.55)]', narrow && 'max-w-[440px] mx-auto')}>
+      <div className="flex gap-1.5 px-2 pb-2 sm:pb-3" aria-hidden="true">
+        <span className="size-2.5 rounded-full bg-white/25" /><span className="size-2.5 rounded-full bg-white/25" /><span className="size-2.5 rounded-full bg-white/25" />
+      </div>
+      <img src={`/screens/${src}.webp`} alt={alt} loading="lazy" className="w-full h-auto rounded-lg bg-white" />
+    </figure>
+  );
+}
+
+export function FeaturesPage() {
+  const { t } = useLang();
+  const f = t.features;
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+  return (
+    <>
+      <section className="bg-paper border-b border-line">
+        <div className="wrap py-16 lg:py-20">
+          <div>
+            <h1 className="display text-[40px] sm:text-[56px] max-w-[18ch]">{f.title}</h1>
+            <p className="mt-5 text-[18px] text-ink-2 max-w-[48ch] leading-relaxed">{f.lead}</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a href="/#demo" className="btn btn-primary">{f.ctaBtn}</a>
+              <a href="/#pricing" className="btn btn-line">{f.ctaPlans}</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12 border-b border-line bg-white">
+        <div className="wrap">
+          <h2 className="text-[15px] font-semibold text-ink-2">{f.modulesTitle}</h2>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {f.modules.map((m) => <li key={m} className="px-3.5 py-2 rounded-full border border-line text-[14px] bg-paper">{m}</li>)}
+          </ul>
+        </div>
+      </section>
+
+      <div className="py-8">
+        {f.shots.map((s, i) => (
+          <section key={s.img} className={cx('wrap py-14 lg:py-20 grid gap-10 lg:gap-16 items-center', i % 2 === 1 ? 'lg:grid-cols-[1.5fr_1fr]' : 'lg:grid-cols-[1fr_1.5fr]')}>
+            <div className={cx(i % 2 === 1 && 'lg:order-2')}>
+              <h2 className="h2">{s.title}</h2>
+              <p className="mt-4 text-[17px] text-ink-2 leading-relaxed max-w-[46ch]">{s.body}</p>
+              <ul className="mt-6 grid gap-3">
+                {s.points.map((p) => (
+                  <li key={p} className="flex gap-3 items-start text-[16px]"><Icon name="check" size={20} className="text-signal mt-0.5 shrink-0" />{p}</li>
+                ))}
+              </ul>
+            </div>
+            <Screen src={s.img} alt={s.title} narrow={s.img === 'login'} />
+          </section>
+        ))}
+      </div>
+
+      <section className="bg-ink text-white">
+        <div className="wrap py-16 flex flex-col sm:flex-row gap-6 sm:items-center justify-between">
+          <h2 className="display text-[30px] sm:text-[38px] max-w-[20ch]">{f.cta}</h2>
+          <div className="flex flex-wrap gap-3">
+            <a href="/#demo" className="btn btn-primary">{f.ctaBtn}</a>
+            <a href="/#pricing" className="btn bg-white/10 text-white hover:bg-white/20">{f.ctaPlans}</a>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
