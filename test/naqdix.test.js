@@ -224,3 +224,19 @@ test('admin: change password', async () => {
   assert.equal((await admin('PATCH', '/api/admin/me/password', { current: 'secret-pass-1', password: 'new-pass-123' })).status, 200);
   assert.equal((await call('POST', '/api/admin/login', { email: 'owner@naqdix.com', password: 'new-pass-123' })).status, 200);
 });
+
+test('emails: welcome with receipt, and a separate serial key email for the app', async () => {
+  const { customerEmails } = await import('../server/services/email.js');
+  const order = { id: 1, kind: 'app', interval: 'once', lang: 'en', token: 't0k', number: 'NQX-2026-00009', customer_name: 'Ahmad <Ali>', email: 'ahmad@ali.test', product_name: 'Naqdi X POS for Android', amount: 145, currency: 'KWD', paid_at: Date.now() };
+  const license = { serial: 'NQX-AB12-CD34-EF56', customer_name: 'Ahmad <Ali>', email: 'ahmad@ali.test' };
+  const [welcome, key] = await customerEmails(order, license);
+  assert.match(welcome.subject, /Welcome to Naqdi X/);
+  assert.match(welcome.html, /NQX-2026-00009/);
+  assert.ok(!welcome.html.includes('<Ali>'), 'names are escaped');
+  assert.match(key.subject, /NQX-AB12-CD34-EF56/);
+  assert.equal(key.to, 'ahmad@ali.test');
+  assert.match(key.html, /wa\.me\/96555550000/, 'WhatsApp button uses the number from settings');
+  const ar = await customerEmails({ ...order, lang: 'ar' }, license);
+  assert.match(ar[1].html, /dir="rtl"/);
+  assert.equal((await customerEmails({ ...order, kind: 'plan', interval: 'yearly', period_end: Date.now() + 864e5 * 365 }, null)).length, 1, 'plans get only the welcome email');
+});

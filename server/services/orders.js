@@ -2,7 +2,7 @@
 import { config } from '../config.js';
 import { db, j, now, insert } from '../db.js';
 import { bad, notFound, token, serial, cleanEmail, cleanPhone, text } from '../lib/util.js';
-import { safeSend, receiptEmail, teamOrderEmail } from './email.js';
+import { safeSend, customerEmails, teamOrderEmail } from './email.js';
 
 const DAY = 86400_000;
 
@@ -76,7 +76,7 @@ export async function markPaid(orderId, { provider, ref }) {
     return { order: await trx('orders').where({ id: order.id }).first(), license, fresh: true };
   });
   if (result.fresh) {
-    await safeSend(receiptEmail(result.order, result.license));
+    for (const m of await customerEmails(result.order, result.license)) await safeSend(m);
     if (config.notifyEmail) await safeSend(teamOrderEmail(result.order, result.license));
   }
   return result;

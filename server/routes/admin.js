@@ -7,7 +7,7 @@ import { config } from '../config.js';
 import { db, now, s, insert } from '../db.js';
 import { h, bad, notFound, HttpError, text, cleanEmail, cleanPhone } from '../lib/util.js';
 import { markPaid, issueLicense, productOut } from '../services/orders.js';
-import { safeSend, receiptEmail, mailEnabled } from '../services/email.js';
+import { safeSend, customerEmails, serialEmail, contactInfo, mailEnabled } from '../services/email.js';
 import { paymentMethods } from '../services/paypal.js';
 
 const r = Router();
@@ -104,7 +104,7 @@ r.post('/orders/:id/resend', h(async (req, res) => {
   const order = await db('orders').where({ id: req.params.id, status: 'paid' }).first();
   if (!order) throw bad('Only paid orders have a receipt');
   if (!mailEnabled()) throw bad('Email is not set up on the server (Mailgun)');
-  await safeSend(receiptEmail(order, await db('licenses').where({ order_id: order.id }).first()));
+  for (const m of await customerEmails(order, await db('licenses').where({ order_id: order.id }).first())) await safeSend(m);
   res.json({ ok: true });
 }));
 
@@ -124,7 +124,19 @@ r.post('/licenses', h(async (req, res) => {
   const name = text(req.body?.name, 120);
   if (!name) throw bad('Enter the customer name');
   const license = await issueLicense({ productId: app?.id, name, email: cleanEmail(req.body?.email), phone: cleanPhone(req.body?.phone), notes: text(req.body?.notes, 1000) });
+  if (license.email && req.body?.send !== false) await safeSend(serialEmail(license, { lang: req.body?.lang === 'ar' ? 'ar' : 'en' }, await contactInfo()));
   res.status(201).json(license);
+}));
+
+/** Email a serial code to its customer again. */
+r.post('/licenses/:id/send', h(async (req, res) => {
+  const l = await db('licenses').where({ id: req.params.id }).first();
+  if (!l) throw bad('Serial not found');
+  if (!l.email) throw bad('This serial has no customer email');
+  if (!mailEnabled()) throw bad('Email is not set up on the server (Mailgun)');
+  const order = l.order_id ? await db('orders').where({ id: l.order_id }).first() : null;
+  await safeSend(serialEmail(l, { lang: order?.lang || 'en', order }, await contactInfo()));
+  res.json({ ok: true });
 }));
 
 /** { status: issued|activated|revoked, device, notes } */

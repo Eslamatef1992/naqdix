@@ -28,5 +28,6 @@ export const config = {
     apiKey: env.MAILGUN_API_KEY || '', domain: env.MAILGUN_DOMAIN || '', region: env.MAILGUN_REGION === 'eu' ? 'eu' : 'us', apiBase: env.MAILGUN_API_BASE || '',
     from: env.MAILGUN_FROM || `Naqdi X <noreply@${env.MAILGUN_DOMAIN || 'naqdix.com'}>`,
   },
+  supportEmail: env.SUPPORT_EMAIL || 'support@naqdix.com',
   notifyEmail: env.NOTIFY_EMAIL || '', // gets an email for every paid order and demo request
 };

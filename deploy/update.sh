@@ -100,6 +100,7 @@ MAILGUN_API_KEY=$(from_wappflow MAILGUN_API_KEY)
 MAILGUN_DOMAIN=$MG_DOMAIN
 MAILGUN_REGION=$(from_wappflow MAILGUN_REGION)
 MAILGUN_FROM="Naqdi X <noreply@${MG_DOMAIN:-$DOMAIN}>"
+SUPPORT_EMAIL=support@$DOMAIN
 # gets an email for every paid order and demo request
 NOTIFY_EMAIL=$ADMIN_EMAIL
 EOF

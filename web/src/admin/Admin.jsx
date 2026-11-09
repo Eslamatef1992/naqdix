@@ -240,12 +240,13 @@ function Licenses() {
           <label className="grid gap-1.5 text-[14px] font-medium">Device / build<input className="field" placeholder="e.g. Sunmi V2s · build 1.4" value={edit.device || ''} onChange={(e) => setEdit({ ...edit, device: e.target.value })} /></label>
           <label className="grid gap-1.5 text-[14px] font-medium">Notes<textarea className="field" rows={3} value={edit.notes || ''} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} /></label>
           <button className="btn btn-primary" disabled={busy} onClick={() => run(async () => { await patch(`/api/admin/licenses/${edit.id}`, { status: edit.status, device: edit.device, notes: edit.notes }); setEdit(null); reload(); })}>Save</button>
+          {edit.email && <button className="btn btn-line" disabled={busy} onClick={() => run(async () => { await post(`/api/admin/licenses/${edit.id}/send`, {}); }, `Serial emailed to ${edit.email}`)}>Email the serial to {edit.email}</button>}
           <Note />
         </Modal>
       )}
       {issue && (
         <Modal title="Issue a serial by hand" onClose={() => setIssue(null)}>
-          <p className="text-[14px] text-ink-2">For a free copy, a partner, or a replacement. No payment is recorded.</p>
+          <p className="text-[14px] text-ink-2">For a free copy, a partner, or a replacement. No payment is recorded. If you add an email, the serial is emailed to the customer.</p>
           {[['name', 'Customer name'], ['phone', 'Phone'], ['email', 'Email']].map(([k, l]) => <label key={k} className="grid gap-1.5 text-[14px] font-medium">{l}<input className="field" value={issue[k]} onChange={(e) => setIssue({ ...issue, [k]: e.target.value })} /></label>)}
           <label className="grid gap-1.5 text-[14px] font-medium">Notes<textarea className="field" rows={2} value={issue.notes} onChange={(e) => setIssue({ ...issue, notes: e.target.value })} /></label>
           {issue.serial ? <p className="rounded-xl bg-sky p-4 text-center text-[22px] font-extrabold tracking-wider" style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{issue.serial}</p>

@@ -11,7 +11,8 @@
     "dev:web": "vite --config web/vite.config.js",
     "build": "vite build --config web/vite.config.js",
     "test": "node --test test/*.test.js",
-    "create-admin": "node server/scripts/create-admin.js"
+    "create-admin": "node server/scripts/create-admin.js",
+    "test-email": "node server/scripts/test-email.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
