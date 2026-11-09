@@ -393,11 +393,20 @@ export function FeaturesPage() {
         </div>
       </section>
 
-      <section className="py-12 border-b border-line bg-white">
+      <section className="py-16 lg:py-20 border-b border-line bg-white">
         <div className="wrap">
-          <h2 className="text-[15px] font-semibold text-ink-2">{f.modulesTitle}</h2>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {f.modules.map((m) => <li key={m} className="px-3.5 py-2 rounded-full border border-line text-[14px] bg-paper">{m}</li>)}
+          <h2 className="h2">{f.modulesTitle}</h2>
+          <p className="mt-3 text-[17px] text-ink-2 max-w-[52ch]">{f.modulesLead}</p>
+          <ul className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-8">
+            {f.modules.map(([icon, name, desc]) => (
+              <li key={name} className="flex gap-3.5">
+                <span className="shrink-0 size-10 rounded-xl bg-sky grid place-items-center text-signal"><Icon name={icon} size={20} /></span>
+                <div>
+                  <p className="font-semibold text-[16px]">{name}</p>
+                  <p className="mt-1 text-[14px] text-ink-2 leading-relaxed">{desc}</p>
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
       </section>

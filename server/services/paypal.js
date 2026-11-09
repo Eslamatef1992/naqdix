@@ -53,7 +53,6 @@ export async function createPaypalOrder(order, { card = false } = {}) {
     purchase_units: [{
       reference_id: order.number, custom_id: String(order.id), invoice_id: order.number,
       description: `${config.brand} · ${order.product_name}${order.interval !== 'once' ? ` (${order.interval})` : ''}`.slice(0, 127),
-      soft_descriptor: 'NAQDIX',
       amount: { currency_code: amount.currency, value: amount.value },
     }],
     payment_source: {
