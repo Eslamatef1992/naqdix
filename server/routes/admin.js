@@ -7,6 +7,7 @@ import { config } from '../config.js';
 import { db, now, s, insert } from '../db.js';
 import { h, bad, notFound, HttpError, text, cleanEmail, cleanPhone } from '../lib/util.js';
 import { markPaid, issueLicense, productOut } from '../services/orders.js';
+import { out as subOut, subscriberIn, getSubscriber, renewSubscriber, SOON_DAYS } from '../services/subscribers.js';
 import { safeSend, customerEmails, serialEmail, contactInfo, mailEnabled } from '../services/email.js';
 import { paymentMethods } from '../services/paypal.js';
 
@@ -52,6 +53,8 @@ r.get('/stats', h(async (_req, res) => {
     expiringSoon: await count(paid().andWhere({ kind: 'plan' }).andWhere('period_end', '>', t).andWhere('period_end', '<', t + 14 * DAY)),
     serialsWaiting: await count(db('licenses').where({ status: 'issued' })),
     newLeads: await count(db('leads').where({ status: 'new' })),
+    posActive: await count(db('pos_subscribers').where({ suspended: false }).andWhere((w) => w.whereNull('end_date').orWhere('end_date', '>', t))),
+    posExpiring: await count(db('pos_subscribers').where({ suspended: false }).andWhere('end_date', '>', t).andWhere('end_date', '<=', t + SOON_DAYS * DAY)),
     pending: await count(db('orders').where({ status: 'pending' }).andWhere('created_at', '>', t - 7 * DAY)),
     recent: await db('orders').orderBy('id', 'desc').limit(8).select('id', 'number', 'product_name', 'interval', 'customer_name', 'amount', 'currency', 'status', 'created_at'),
     setup: { paypal: paymentMethods().length > 0, email: mailEnabled(), notifyEmail: !!config.notifyEmail },
@@ -153,6 +156,62 @@ r.patch('/licenses/:id', h(async (req, res) => {
   if (req.body.notes !== undefined) patch.notes = text(req.body.notes, 1000);
   await db('licenses').where({ id: l.id }).update(patch);
   res.json(await db('licenses').where({ id: l.id }).first());
+}));
+
+// ---------- POS subscribers ----------
+r.get('/pos', h(async (req, res) => {
+  const t = now();
+  const base = () => {
+    const q = db('pos_subscribers');
+    if (req.query.q) { const like = `%${req.query.q}%`; q.where((w) => w.where('name', 'like', like).orWhere('store', 'like', like).orWhere('phone', 'like', like).orWhere('email', 'like', like).orWhere('serial', 'like', like).orWhere('package', 'like', like)); }
+    return q;
+  };
+  const q = base();
+  const live = (w) => w.where({ suspended: false });
+  switch (req.query.state) {
+    case 'active': live(q).andWhere((w) => w.whereNull('end_date').orWhere('end_date', '>', t)); break;
+    case 'expiring': live(q).andWhere('end_date', '>', t).andWhere('end_date', '<=', t + SOON_DAYS * DAY); break;
+    case 'expired': live(q).andWhere('end_date', '<=', t); break;
+    case 'suspended': q.where({ suspended: true }); break;
+    default:
+  }
+  const c = async (fn) => +((await fn(base()).count({ c: '*' }).first())?.c || 0);
+  const counts = {
+    all: await c((x) => x),
+    active: await c((x) => live(x).andWhere((w) => w.whereNull('end_date').orWhere('end_date', '>', t))),
+    expiring: await c((x) => live(x).andWhere('end_date', '>', t).andWhere('end_date', '<=', t + SOON_DAYS * DAY)),
+    expired: await c((x) => live(x).andWhere('end_date', '<=', t)),
+    suspended: await c((x) => x.where({ suspended: true })),
+  };
+  const total = +(await q.clone().count({ c: '*' }).first()).c;
+  const { limit, offset } = page(req);
+  // soonest end dates first; no-end-date ones last
+  const rows = await q.orderByRaw('CASE WHEN end_date IS NULL THEN 1 ELSE 0 END').orderBy('end_date', 'asc').orderBy('id', 'desc').limit(limit).offset(offset);
+  res.json({ total, counts, soonDays: SOON_DAYS, data: rows.map((s) => subOut(s, t)) });
+}));
+
+r.post('/pos', h(async (req, res) => {
+  const row = await subscriberIn(req.body || {});
+  if (row.start_date == null) row.start_date = now();
+  const t = now();
+  const id = await insert('pos_subscribers', { currency: 'KWD', suspended: false, ...row, created_at: t, updated_at: t });
+  res.status(201).json(subOut(await getSubscriber(id)));
+}));
+
+r.patch('/pos/:id', h(async (req, res) => {
+  const s = await getSubscriber(req.params.id);
+  const row = await subscriberIn(req.body || {}, s);
+  await db('pos_subscribers').where({ id: s.id }).update({ ...row, updated_at: now() });
+  res.json(subOut(await getSubscriber(s.id)));
+}));
+
+/** { years, months } — extends from the current end date, or from today if it already ended */
+r.post('/pos/:id/renew', h(async (req, res) => res.json(subOut(await renewSubscriber(req.params.id, req.body || {})))));
+
+r.delete('/pos/:id', h(async (req, res) => {
+  await getSubscriber(req.params.id);
+  await db('pos_subscribers').where({ id: req.params.id }).del();
+  res.json({ ok: true });
 }));
 
 // ---------- products and prices ----------

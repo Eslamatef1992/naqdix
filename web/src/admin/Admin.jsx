@@ -1,11 +1,11 @@
 // Naqdi X admin panel (admin.naqdix.com): orders, serial codes, products and prices, demo requests, settings.
 import { Fragment, useState } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom';
-import { get, post, patch, put, useApi, getToken, setToken, money, date, dateTime } from '../lib/api.js';
+import { get, post, patch, put, del, useApi, getToken, setToken, money, date, dateTime } from '../lib/api.js';
 import { Icon } from '../components/Icon.jsx';
 
 const cx = (...c) => c.filter(Boolean).join(' ');
-const TONE = { paid: 'bg-paid-wash text-paid', pending: 'bg-warn-wash text-warn', canceled: 'bg-paper text-ink-3', issued: 'bg-sky text-signal', activated: 'bg-paid-wash text-paid', revoked: 'bg-[#fdecea] text-danger', new: 'bg-sky text-signal', contacted: 'bg-warn-wash text-warn', closed: 'bg-paper text-ink-3' };
+const TONE = { paid: 'bg-paid-wash text-paid', pending: 'bg-warn-wash text-warn', canceled: 'bg-paper text-ink-3', issued: 'bg-sky text-signal', activated: 'bg-paid-wash text-paid', revoked: 'bg-[#fdecea] text-danger', new: 'bg-sky text-signal', active: 'bg-paid-wash text-paid', lifetime: 'bg-sky text-signal', expiring: 'bg-warn-wash text-warn', expired: 'bg-[#fdecea] text-danger', suspended: 'bg-paper text-ink-3', contacted: 'bg-warn-wash text-warn', closed: 'bg-paper text-ink-3' };
 const Badge = ({ s }) => <span className={cx('inline-flex px-2 py-0.5 rounded-md text-[12px] font-semibold capitalize', TONE[s] || 'bg-paper')}>{s}</span>;
 const Panel = ({ title, actions, children, className = '' }) => (
   <section className={cx('bg-white border border-line rounded-xl', className)}>
@@ -62,7 +62,7 @@ function Login() {
 
 function Shell({ children }) {
   const nav = useNavigate();
-  const items = [['/admin', 'home', 'Dashboard', true], ['/admin/orders', 'cart', 'Orders'], ['/admin/licenses', 'key', 'Serial codes'], ['/admin/products', 'tag', 'Products & prices'], ['/admin/leads', 'inbox', 'Demo requests'], ['/admin/settings', 'settings', 'Settings']];
+  const items = [['/admin', 'home', 'Dashboard', true], ['/admin/pos', 'register', 'POS subscribers'], ['/admin/orders', 'cart', 'Orders'], ['/admin/licenses', 'key', 'Serial codes'], ['/admin/products', 'tag', 'Products & prices'], ['/admin/leads', 'inbox', 'Demo requests'], ['/admin/settings', 'settings', 'Settings']];
   return (
     <div className="min-h-screen lg:flex bg-paper" dir="ltr">
       <aside className="lg:w-60 lg:min-h-screen bg-ink text-white flex lg:flex-col">
@@ -88,7 +88,7 @@ function Dashboard() {
   const { data } = useApi('/api/admin/stats');
   const nav = useNavigate();
   if (!data) return <Loading />;
-  const cards = [['Revenue (30 days)', money(data.revenue30)], ['Paid orders (30 days)', data.orders30], ['Active plans', data.activePlans], ['Serials to activate', data.serialsWaiting], ['New demo requests', data.newLeads]];
+  const cards = [['Revenue (30 days)', money(data.revenue30)], ['POS subscribers active', data.posActive, '/admin/pos?state=active'], ['Ending in 30 days', data.posExpiring, '/admin/pos?state=expiring'], ['Serials to activate', data.serialsWaiting, '/admin/licenses'], ['New demo requests', data.newLeads, '/admin/leads']];
   return (
     <>
       <h1 className="text-[24px] font-extrabold mb-6">Dashboard</h1>
@@ -99,7 +99,7 @@ function Dashboard() {
         </div>
       )}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-        {cards.map(([l, v]) => <div key={l} className="bg-white border border-line rounded-xl p-4"><p className="text-[13px] text-ink-3">{l}</p><p className="text-[24px] font-extrabold tnum mt-1">{v}</p></div>)}
+        {cards.map(([l, v, to]) => { const C = to ? Link : 'div'; return <C key={l} to={to} className={cx('bg-white border border-line rounded-xl p-4', to && 'hover:border-signal')}><p className="text-[13px] text-ink-3">{l}</p><p className="text-[24px] font-extrabold tnum mt-1">{v}</p></C>; })}
       </div>
       {data.expiringSoon > 0 && <p className="mb-6 text-[14px] rounded-xl bg-sky p-3">{data.expiringSoon} plan{data.expiringSoon > 1 ? 's end' : ' ends'} in the next 14 days. Customers can renew from their order page.</p>}
       <Panel title="Latest orders" actions={<Link to="/admin/orders" className="text-[14px] text-signal font-semibold">All orders</Link>}>
@@ -258,6 +258,110 @@ function Licenses() {
   );
 }
 
+// ---------- POS subscribers ----------
+const isoDay = (ms) => (ms == null ? '' : new Date(+ms).toISOString().slice(0, 10));
+const plusYears = (iso, n) => { const d = new Date((iso || isoDay(Date.now())) + 'T12:00:00Z'); d.setUTCFullYear(d.getUTCFullYear() + n); return isoDay(d.getTime()); };
+const STATE_LABEL = { active: 'Active', lifetime: 'No end date', expiring: 'Ending soon', expired: 'Expired', suspended: 'Suspended' };
+const StateBadge = ({ s }) => <span className={cx('inline-flex px-2 py-0.5 rounded-md text-[12px] font-semibold', TONE[s])}>{STATE_LABEL[s]}</span>;
+function daysText(sub) {
+  if (sub.end_date == null) return 'No end date';
+  if (sub.days_left > 1) return `${sub.days_left} days left`;
+  if (sub.days_left === 1) return '1 day left';
+  if (sub.days_left === 0) return 'Ends today';
+  return `Ended ${-sub.days_left} day${sub.days_left === -1 ? '' : 's'} ago`;
+}
+
+function Pos() {
+  const params = new URLSearchParams(window.location.search);
+  const [p, setP] = useState(1); const [state, setState] = useState(params.get('state') || ''); const [q, setQ] = useState('');
+  const { data, reload } = useApi(`/api/admin/pos?page=${p}&state=${state}&q=${encodeURIComponent(q)}`);
+  const { data: products } = useApi('/api/admin/products');
+  const [f, setF] = useState(null);
+  const [run, busy, Note] = useRun();
+  const blank = () => {
+    const first = products?.data?.find((x) => x.kind === 'plan' && x.is_active) || products?.data?.[0];
+    const start = isoDay(Date.now());
+    return { name: '', store: '', phone: '', email: '', product_id: first?.id || '', package: '', start_date: start, end_date: first?.kind === 'app' ? '' : plusYears(start, 1), lifetime: first?.kind === 'app', amount: first ? (first.kind === 'app' ? first.price_once : first.price_yearly) ?? '' : '', notes: '', suspended: false };
+  };
+  const open = (sub) => setF({ ...sub, start_date: isoDay(sub.start_date), end_date: isoDay(sub.end_date), lifetime: sub.end_date == null, product_id: sub.product_id || '', amount: sub.amount ?? '' });
+  const pickProduct = (id) => {
+    const pr = products?.data?.find((x) => String(x.id) === String(id));
+    const lifetime = pr?.kind === 'app';
+    setF({ ...f, product_id: id, package: pr ? pr.name : f.package, lifetime, end_date: lifetime ? '' : (f.end_date || plusYears(f.start_date, 1)), amount: f.id ? f.amount : (pr ? (pr.kind === 'app' ? pr.price_once : pr.price_yearly) ?? '' : f.amount) });
+  };
+  const save = () => run(async () => {
+    const body = { ...f, end_date: f.lifetime ? null : f.end_date };
+    if (f.id) await patch(`/api/admin/pos/${f.id}`, body); else await post('/api/admin/pos', body);
+    setF(null); reload();
+  });
+  const tabs = [['', 'All', 'all'], ['active', 'Active', 'active'], ['expiring', `Ending in ${data?.soonDays || 30} days`, 'expiring'], ['expired', 'Expired', 'expired'], ['suspended', 'Suspended', 'suspended']];
+  const field = (k, label, type = 'text', extra = {}) => <label className="grid gap-1.5 text-[14px] font-medium">{label}<input className="field" type={type} value={f[k] ?? ''} onChange={(e) => setF({ ...f, [k]: e.target.value })} {...extra} /></label>;
+  return (
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <h1 className="text-[24px] font-extrabold">POS subscribers</h1>
+        <button className="btn btn-primary !h-10" disabled={!products} onClick={() => setF(blank())}><Icon name="plus" size={18} />Add subscriber</button>
+      </div>
+      <p className="text-[14px] text-ink-2 mb-5 max-w-[80ch]">Every store using Naqdi X, with its package and end date. Customers who pay on the website are added here automatically; add stores that paid by cash, KNET or transfer yourself.</p>
+      <Panel>
+        <div className="flex flex-wrap gap-2 p-4 border-b border-line">
+          {tabs.map(([v, l, k]) => (
+            <button key={v} onClick={() => { setState(v); setP(1); }} className={cx('h-9 px-3 rounded-lg text-[14px] border', state === v ? 'bg-ink text-white border-ink' : 'border-line hover:bg-paper')}>
+              {l}{data && <span className={cx('ms-1.5 tnum', state === v ? 'text-white/70' : 'text-ink-3')}>{data.counts[k]}</span>}
+            </button>
+          ))}
+          <input className="field !h-9 !w-64 ms-auto" placeholder="Search name, store, phone, serial" value={q} onChange={(e) => { setQ(e.target.value); setP(1); }} />
+        </div>
+        {!data ? <Loading /> : <>
+          <Table rows={data.data} onRow={open} empty={q || state ? 'No subscribers match.' : 'No subscribers yet. Add your first store.'} cols={[
+            ['Customer', (s) => <div><p className="font-semibold">{s.name}</p><p className="text-ink-3 text-[12px]">{s.store || ''}</p></div>],
+            ['Contact', (s) => <div className="text-[13px]"><p>{s.phone || '—'}</p><p className="text-ink-3">{s.email || ''}</p></div>],
+            ['Package', (s) => <div><p>{s.package}</p>{s.serial && <p className="text-ink-3 text-[12px]" style={{ fontFamily: 'ui-monospace, Menlo, monospace' }}>{s.serial}</p>}</div>],
+            ['Start', (s) => <span className="text-ink-2 whitespace-nowrap">{date(s.start_date)}</span>],
+            ['End date', (s) => <div className="whitespace-nowrap"><p className="font-medium">{s.end_date ? date(s.end_date) : '—'}</p><p className={cx('text-[12px]', s.state === 'expired' ? 'text-danger' : s.state === 'expiring' ? 'text-warn' : 'text-ink-3')}>{daysText(s)}</p></div>],
+            ['Status', (s) => <StateBadge s={s.state} />],
+          ]} />
+          <Pager page={p} total={data.total} onChange={setP} />
+        </>}
+      </Panel>
+      {f && (
+        <Modal title={f.id ? f.name : 'Add a POS subscriber'} onClose={() => setF(null)}>
+          <div className="grid grid-cols-2 gap-3">{field('name', 'Customer name')}{field('store', 'Store / company')}{field('phone', 'Phone / WhatsApp', 'tel')}{field('email', 'Email', 'email')}</div>
+          <label className="grid gap-1.5 text-[14px] font-medium">Package
+            <select className="field" value={f.product_id} onChange={(e) => pickProduct(e.target.value)}>
+              {(products?.data || []).map((pr) => <option key={pr.id} value={pr.id}>{pr.name}{pr.is_active ? '' : ' (hidden)'}</option>)}
+              <option value="">Other (type a name)</option>
+            </select>
+          </label>
+          {!f.product_id && field('package', 'Package name')}
+          <div className="grid grid-cols-2 gap-3">
+            {field('start_date', 'Start date', 'date')}
+            <label className="grid gap-1.5 text-[14px] font-medium">End date<input className="field" type="date" disabled={f.lifetime} value={f.lifetime ? '' : f.end_date || ''} onChange={(e) => setF({ ...f, end_date: e.target.value })} /></label>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-[14px]">
+            {!f.lifetime && [1, 2, 3].map((n) => <button key={n} type="button" className="btn btn-line !h-8 !px-3 !text-[13px]" onClick={() => setF({ ...f, end_date: plusYears(f.start_date, n) })}>{n} year{n > 1 ? 's' : ''} from start</button>)}
+            <label className="inline-flex items-center gap-2 ms-auto"><input type="checkbox" checked={!!f.lifetime} onChange={(e) => setF({ ...f, lifetime: e.target.checked, end_date: e.target.checked ? '' : plusYears(f.start_date, 1) })} />No end date</label>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {field('amount', 'Amount paid (KWD)', 'number', { step: '0.001', min: '0' })}
+            <label className="grid gap-1.5 text-[14px] font-medium">Status<select className="field" value={f.suspended ? '1' : ''} onChange={(e) => setF({ ...f, suspended: !!e.target.value })}><option value="">Running</option><option value="1">Suspended</option></select></label>
+          </div>
+          <label className="grid gap-1.5 text-[14px] font-medium">Notes<textarea className="field" rows={2} value={f.notes || ''} onChange={(e) => setF({ ...f, notes: e.target.value })} /></label>
+          <button className="btn btn-primary" disabled={busy} onClick={save}>{f.id ? 'Save changes' : 'Add subscriber'}</button>
+          {f.id && (
+            <div className="flex flex-wrap gap-2 pt-1 border-t border-line">
+              {!f.lifetime && <button className="btn btn-line !h-9 mt-3" disabled={busy} onClick={() => run(async () => { const s = await post(`/api/admin/pos/${f.id}/renew`, { years: 1 }); open(s); reload(); }, 'Renewed for 1 year')}>Renew 1 year</button>}
+              {f.order_id && <Link to={`/admin/orders/${f.order_id}`} className="btn btn-line !h-9 mt-3">View order</Link>}
+              <button className="btn !h-9 mt-3 ms-auto text-danger hover:bg-[#fdecea]" disabled={busy} onClick={() => { if (window.confirm(`Delete ${f.name}? This can't be undone.`)) run(async () => { await del(`/api/admin/pos/${f.id}`); setF(null); reload(); }); }}>Delete</button>
+            </div>
+          )}
+          <Note />
+        </Modal>
+      )}
+    </>
+  );
+}
+
 function Modal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 bg-ink/40 grid place-items-center p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
@@ -383,6 +487,7 @@ export default function Admin() {
         <Shell>
           <Routes>
             <Route index element={<Dashboard />} />
+            <Route path="pos" element={<Pos />} />
             <Route path="orders" element={<Orders />} />
             <Route path="orders/:id" element={<OrderDetail />} />
             <Route path="licenses" element={<Licenses />} />

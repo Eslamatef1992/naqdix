@@ -16,6 +16,7 @@ export const get = (u) => api('GET', u);
 export const post = (u, b) => api('POST', u, b || {});
 export const patch = (u, b) => api('PATCH', u, b || {});
 export const put = (u, b) => api('PUT', u, b || {});
+export const del = (u) => api('DELETE', u);
 
 export function useApi(url) {
   const [data, setData] = useState(null);

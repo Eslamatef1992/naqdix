@@ -198,6 +198,38 @@ test('admin: serial codes can be activated, revoked, or issued by hand', async (
   assert.equal((await call('GET', `/api/orders/${appOrder.token}`)).data.serial, null);
 });
 
+test('admin: POS subscribers fill from paid orders, and can be added, renewed and filtered', async () => {
+  const auto = (await admin('GET', '/api/admin/pos')).data;
+  assert.ok(auto.total >= 2, 'paid plans and app purchases are listed');
+  const app = auto.data.find((x) => x.serial);
+  assert.equal(app.end_date, null);
+  assert.equal(app.state, 'lifetime');
+  const plan = auto.data.find((x) => x.end_date);
+  assert.ok(plan.days_left > 300, 'a yearly plan (renewals extend the same row)');
+  assert.equal(auto.data.filter((x) => x.end_date && x.email === plan.email && x.product_id === plan.product_id).length, 1);
+
+  assert.equal((await admin('POST', '/api/admin/pos', { name: 'No date shop', product_id: plan.product_id })).status, 400);
+  const add = await admin('POST', '/api/admin/pos', { name: 'Cash Store', store: 'Cash Store Hawally', phone: '+96551112222', product_id: plan.product_id, start_date: '2025-01-10', end_date: '2025-12-31', amount: 65 });
+  assert.equal(add.status, 201);
+  assert.equal(add.data.state, 'expired');
+  assert.equal(add.data.package, plan.package);
+  assert.equal((await admin('GET', '/api/admin/pos?state=expired')).data.data[0].name, 'Cash Store');
+
+  const renewed = (await admin('POST', `/api/admin/pos/${add.data.id}/renew`, { years: 1 })).data;
+  assert.equal(renewed.state, 'active');
+  assert.ok(renewed.days_left >= 364 && renewed.days_left <= 367, 'renewing an expired one counts from today');
+
+  const soon = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
+  await admin('PATCH', `/api/admin/pos/${add.data.id}`, { end_date: soon });
+  const exp = (await admin('GET', '/api/admin/pos?state=expiring')).data;
+  assert.equal(exp.counts.expiring, 1);
+  assert.equal((await admin('GET', '/api/admin/stats')).data.posExpiring, 1);
+  assert.equal((await admin('PATCH', `/api/admin/pos/${add.data.id}`, { end_date: '2020-01-01' })).status, 400, 'end before start');
+  assert.equal((await admin('GET', '/api/admin/pos?q=Hawally')).data.total, 1);
+  assert.equal((await admin('DELETE', `/api/admin/pos/${add.data.id}`)).status, 200);
+  assert.equal((await admin('GET', '/api/admin/pos?q=Hawally')).data.total, 0);
+});
+
 test('admin: prices and contact details show on the website', async () => {
   const products = (await admin('GET', '/api/admin/products')).data.data;
   const app = products.find((p) => p.slug === 'android-pos');

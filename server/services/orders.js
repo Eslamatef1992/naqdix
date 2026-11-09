@@ -3,6 +3,7 @@ import { config } from '../config.js';
 import { db, j, now, insert } from '../db.js';
 import { bad, notFound, token, serial, cleanEmail, cleanPhone, text } from '../lib/util.js';
 import { safeSend, customerEmails, teamOrderEmail } from './email.js';
+import { syncFromOrder } from './subscribers.js';
 
 const DAY = 86400_000;
 
@@ -73,6 +74,7 @@ export async function markPaid(orderId, { provider, ref }) {
     await trx('orders').where({ id: order.id }).update(update);
     let license = null;
     if (order.kind === 'app') license = await issueLicense({ order: { ...order, ...update } }, trx);
+    await syncFromOrder({ ...order, ...update }, license, trx);
     return { order: await trx('orders').where({ id: order.id }).first(), license, fresh: true };
   });
   if (result.fresh) {
